@@ -3,6 +3,7 @@ const processMessage = require("../helpers/processMessage");
 module.exports = (req, res) => {
     if (req.body.object === "page") {
         req.body.entry.forEach(entry => {
+            console.log('This is the entry ' + JSON.stringify(entry))
             entry.messaging.forEach(event => {
                 if (event.message && event.message.text) {
                     processMessage(event);

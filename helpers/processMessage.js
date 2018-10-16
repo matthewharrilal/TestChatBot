@@ -1,41 +1,65 @@
 require('dotenv').config()
 const API_AI_TOKEN = process.env.API_AI_TOKEN;
 const apiAiClient = require("apiai")(API_AI_TOKEN);
+const DIALOGFLOW_CLIENT_EMAIL = process.env.DIALOGFLOW_CLIENT_EMAIL
 const FACEBOOK_ACCESS_TOKEN = process.env.FACEBOOK_ACCESS_TOKEN;
+const projectId = 'testagent-bd2d4';
+const sessionId = 'testBot';
+const languageCode = 'en-US';
 const request = require("request");
-
-const sendTextMessage = (senderId, text) => {
-    request({
-        url: "https://graph.facebook.com/v2.6/me/messages", // Send a request for a message from my account
-        qs: {
-            access_token: FACEBOOK_ACCESS_TOKEN // Use my facebook access token for verification that is my page
-        },
-        method: "POST", // Make a post request
-        json: {
-            recipient: { // The recipient of the message is the user who's send id is passed in
-                id: senderId
-            },
-            message: { // Pass in a body of text to be sent to the user
-                text
-            },
-        }
-    });
+const dialogflow = require('dialogflow');
+const config = {
+    credentials: {
+        private_key: API_AI_TOKEN,
+        client_email: DIALOGFLOW_CLIENT_EMAIL
+    }
 };
+
+const sessionClient = new dialogflow.SessionsClient(config);
+
+const sessionPath = sessionClient.sessionPath(projectId, sessionId);
+
+const sendTextMessage = (userId, text) => {
+    return fetch(
+        `https://graph.facebook.com/v2.6/me/messages?access_token=${FACEBOOK_ACCESS_TOKEN}`, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            method: 'POST',
+            body: JSON.stringify({
+                messaging_type: 'RESPONSE',
+                recipient: {
+                    id: userId,
+                },
+                message: {
+                    text,
+                },
+            }),
+        }
+    );
+}
 
 module.exports = (event) => {
-    const senderId = event.sender.id;
+    const userId = event.sender.id;
     const message = event.message.text;
 
-    const apiaiSession = apiAiClient.textRequest(message, {
-        sessionId: "testBot"
-    });
+    const request = {
+        session: sessionPath,
+        queryInput: {
+            text: {
+                text: message,
+                languageCode: languageCode,
+            },
+        },
+    };
 
-    apiaiSession.on("response", (response) => {
-        const result = response.result.fulfillment.speech;
-
-        sendTextMessage(senderId, result);
-    });
-
-    apiaiSession.on("error", error => console.log(error));
-    apiaiSession.end();
-};
+    sessionClient
+        .detectIntent(request)
+        .then(responses => {
+            const result = responses[0].queryResult;
+            return sendTextMessage(userId, result.fulfillmentText);
+        })
+        .catch(err => {
+            console.error('ERROR:', err);
+        });
+}

@@ -1,7 +1,5 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const CircularJSON = require('circular-json');
-const searchJSON = require('./helpers/JSONSearch.js')
 const verificationController = require("./controllers/verification");
 const messageWebhookController = require("./controllers/messageWebhook");
 
@@ -15,7 +13,7 @@ app.use(bodyParser.urlencoded({
 app.get('/', (req, res) => {
     // Get the challenge in the response object to set socket with application
     const hubChallenge = res.socket.parser.incoming.query["hub.challenge"]
-    res.send(hubChallenge)
+    res.send(hubChallenge) // Sent the challenge back to verify facebook application
 });
 
 app.get("/", verificationController);
