@@ -13,7 +13,7 @@ app.use(bodyParser.urlencoded({
 }));
 
 app.get('/', (req, res) => {
-    const strJSON = CircularJSON.stringify(res)
+    // Get the challenge in the response object to set socket with application
     const hubChallenge = res.socket.parser.incoming.query["hub.challenge"]
     res.send(hubChallenge)
 });
