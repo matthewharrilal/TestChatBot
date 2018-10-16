@@ -1,6 +1,5 @@
 require('dotenv').config()
-const API_AI_TOKEN = process.env.API_AI_TOKEN;
-const apiAiClient = require("apiai")(API_AI_TOKEN);
+const apiAiClient = require("apiai");
 const DIALOGFLOW_CLIENT_EMAIL = process.env.DIALOGFLOW_CLIENT_EMAIL
 const FACEBOOK_ACCESS_TOKEN = process.env.FACEBOOK_ACCESS_TOKEN;
 const projectId = 'testagent-bd2d4';
@@ -10,7 +9,7 @@ const request = require("request");
 const dialogflow = require('dialogflow');
 const config = {
     credentials: {
-        private_key: API_AI_TOKEN,
+        private_key: process.env.DIALOGFLOW_PRIVATE_KEY,
         client_email: DIALOGFLOW_CLIENT_EMAIL
     }
 };
