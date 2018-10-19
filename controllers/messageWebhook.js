@@ -19,11 +19,13 @@ const JSON = require('circular-json')
 // }
 
 module.exports = (req, res) => {
-    // console.log('These are the request parameters ' + JSON.stringify(req.params))
     req.body.queryResult.fulfillmentMessages.forEach(textObject => {
         console.log('')
-        console.log('MESSAGE >> ' + JSON.stringify(req.body.queryResult.outputContexts[0].parameters['CS-Topics']))
+        console.log('MESSAGE >> ' + JSON.stringify(req.body.queryResult.fulfillmentText))
         console.log('RESULT >> ' + JSON.stringify(textObject.text.text[0]))
+        if (req.body.queryResult.outputContexts[0].parameters['CS-Topics']) {
+            console.log(req.body.queryResult.outputContexts[0].parameters['CS-Topics'])
+        }
         console.log('')
         res.status(200).end();
     });
