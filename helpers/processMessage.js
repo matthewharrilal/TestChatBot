@@ -1,9 +1,12 @@
-require('dotenv').config()
+require('dotenv').config({
+    path: '.env'
+})
 const apiAiClient = require("apiai");
 const express = require("express");
 const app = express()
+const dialogApp = apiAiClient(process.env.CLIENT_ACCESS_TOKEN)
 const DIALOGFLOW_CLIENT_EMAIL = process.env.DIALOGFLOW_CLIENT_EMAIL
-const FACEBOOK_ACCESS_TOKEN = process.env.FACEBOOK_ACCESS_TOKEN;
+const FACEBOOK_ACCESS_TOKEN = process.env.CLIENT_TOKEN;
 const projectId = 'testagent-bd2d4';
 const sessionId = 'testBot';
 const languageCode = 'en-US';
@@ -24,12 +27,14 @@ const config = {
 };
 
 const sessionClient = new dialogflow.SessionsClient(config);
+console.log('This is the session client ' + sessionClient)
 
 const sessionPath = sessionClient.sessionPath(projectId, sessionId);
+console.log('This is the session path ' + Object.entries(sessionPath))
 
 function body(userId, text) {
     const postBody = {
-        "messaging_type" : 'RESPONSE',
+        "messaging_type": 'RESPONSE',
         "recipient": {
             "id": userId
         },
@@ -61,30 +66,47 @@ const sendTextMessage = (userId, text) => {
     })
 };
 
-module.exports = (event) => {
-    const userId = event.sender.id;
-    const message = event.message.text;
-    console.log("USER ID >>>>>>>>> " + userId)
+module.exports = (res, text) => {
+    // const userId = event.sender.id;
+    // console.log('This is the intent ' + Object.keys)
+    const message = text
+    // const message = event.queryResult.fulfillmentText;
+    // console.log("USER ID >>>>>>>>> " + userId)
     console.log("MESSAGEEE >>>>>>> " + message)
 
-    const request = {
-        session: sessionPath,
-        queryInput: {
-            text: {
-                text: message,
-                languageCode: languageCode,
-            },
-        },
-    };
+    // const apiaiSession = dialogApp.textRequest(message, {
+    //     sessionId
+    // })
+    //
+    // apiaiSession.on('response', (response) => {
+    //     const result = response.result.fulfillment.speech;
+    //     console.log("RESULT >>>>>>> " + result)
+    //     sendTextMessage(userId, result)
+    // });
+    //
+    // apiaiSession.on('error', (error) => {
+    //     console.log(error)
+    // });
+    // apiaiSession.end()
 
-    sessionClient
-        .detectIntent(request)
-        .then(responses => {
-            const result = responses[0].queryResult;
-            console.log("RESULT >>>>>> " + result.fulfillmentText)
-            return sendTextMessage(userId, result.fulfillmentText);
-        })
-        .catch(err => {
-            console.error('ERROR:', err);
-        });
+    // const request = {
+    //     session: sessionPath,
+    //     queryInput: {
+    //         text: {
+    //             text: message,
+    //             languageCode: languageCode,
+    //         },
+    //     },
+    // };
+    //
+    // sessionClient
+    //     .detectIntent(request)
+    //     .then(responses => {
+    //         const result = responses[0].queryResult;
+    //         console.log("RESULT >>>>>> " + result.fulfillmentText)
+    //         return sendTextMessage(userId, result.fulfillmentText);
+    //     })
+    //     .catch(err => {
+    //         console.error('ERROR:', err);
+    //     });
 }

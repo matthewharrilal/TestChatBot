@@ -1,6 +1,5 @@
 module.exports = (req, res) => {
     const hubChallenge = req.query["hub.challenge"]; // Get the challenge of the request
-
     const hubMode = req.query["hub.mode"]; // Get the mode of the type of message it is
     const verifyTokenMatches = (req.query["hub.verify_token"] === "testBot"); // If the token is correct
 
